@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 
 // মূল রাউট: হোম পেজ বা মূল URL এ দেখানোর জন্য
 app.get('/', (req, res) => {
-    res.send('স্বাগতম! আপনার NID যাচাই API চালু হয়েছে। /verify এ POST রিকোয়েস্ট পাঠান।');
+    res.send('স্বাগতম! আপনার NID যাচাই API চালু হয়েছে। /verify এ POST এবং /verify-get এ GET রিকোয়েস্ট পাঠান।');
 });
 
 // mock database data
@@ -25,12 +25,36 @@ const mockDatabase = {
     }
 };
 
-// API endpoint: /verify
+// API endpoint: /verify (POST)
 app.post('/verify', (req, res) => {
     const { nid, dob } = req.body;
 
     if (!nid || !dob) {
-        return res.status(400).json({ message: 'NID এবং জন্ম তারিখ প্রয়োজন' });
+        return res.status(400).json({ message: 'NID এবং জন্ম তারিখ প্রয়োজন' });
+    }
+
+    const userData = mockDatabase[nid];
+
+    if (userData && userData.dob === dob) {
+        res.json({
+            success: true,
+            message: 'তথ্য নিশ্চিত করা হয়েছে',
+            data: userData
+        });
+    } else {
+        res.json({
+            success: false,
+            message: 'তথ্য মিলছে না। দয়া করে আবার চেষ্টা করুন।'
+        });
+    }
+});
+
+// নতুন GET API endpoint: /verify-get
+app.get('/verify-get/:nid/:dob', (req, res) => {
+    const { nid, dob } = req.params;
+
+    if (!nid || !dob) {
+        return res.status(400).json({ message: 'NID এবং জন্ম তারিখ প্রয়োজন' });
     }
 
     const userData = mockDatabase[nid];
